@@ -1,0 +1,5 @@
+setuptools
+pillow
+asyncio
+firebase_admin
+aiohttp

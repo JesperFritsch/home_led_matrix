@@ -1,0 +1,5 @@
+*_venv/
+*.egg-info/
+*.pyc
+*.pyo
+*.pyd
