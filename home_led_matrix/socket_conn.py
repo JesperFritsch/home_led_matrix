@@ -20,27 +20,27 @@ from home_led_matrix.utils import DotDict
 log = logging.getLogger(Path(__file__).stem)
 
 class MsgHandler:
-    def __init__(self) -> None:
+    def __init__(self, socket_file) -> None:
         self.set_handlers = DotDict()
         self.get_handlers = DotDict()
-        self.socket_handler = SocketHandler(conf["SOCKET"]["file"], self)
+        self.socket_handler = SocketHandler(socket_file, self)
         self.default_handler = None
+
 
     def add_handlers(self, message_key, setter=None, getter=None):
         if setter is not None: self.set_handlers[message_key] = setter
         if getter is not None: self.get_handlers[message_key] = getter
 
+    def _default_handler(self, meth_type, key, value):
+        log.debug(f"Invalid/Unhandled message: {meth_type} {key} {value}")
+
     async def send_update(self, *msg_keys):
-        message = {key: self.get_handlers[key]() for key in msg_keys}
+        message = {}
         for key in msg_keys:
             try:
-                val = self.get_handlers[key]()
+                message[key] = self.get_handlers[key]()
             except KeyError:
-                if self.default_handler is not None:
-                    val = self.default_handler('send_update', key, None)
-                val = None
-                log.debug(f'Invalid message: "{key}"')
-            message[key] = val
+                self._default_handler("send_update", key, None)
         await self.socket_handler.send_message(message)
 
     async def handle_msg(self, payload):
@@ -75,6 +75,9 @@ class MsgHandler:
                                 log.debug(f'Invalid message: "{key}"')
                     message[get_key] = get_value
         return message
+
+    def start(self):
+        return asyncio.create_task(self.socket_handler.run_loop())
 
 
 class SocketHandler:

@@ -23,14 +23,13 @@ class DisplayHandler(metaclass=SingletonMeta):
         for (x, y), color in pixels:
             self._matrix.SetPixel(x, y, *color)
 
-    async def clear(self):
+    def clear(self):
         self._matrix.Clear()
 
-    async def set_image(self, image):
-        self._matrix.Clear()
+    def set_image(self, image):
         self._matrix.SetImage(image, unsafe=False)
 
-    async def set_brightness(self, value):
+    def set_brightness(self, value):
         try:
             self._matrix.brightness = int(value)
         except Exception as e:

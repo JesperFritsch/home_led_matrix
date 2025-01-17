@@ -3,3 +3,4 @@ pillow
 asyncio
 firebase_admin
 aiohttp
+websockets
