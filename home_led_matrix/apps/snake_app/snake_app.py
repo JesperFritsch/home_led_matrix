@@ -160,10 +160,10 @@ class SnakeApp(IAsyncApp):
         return self._nr_snakes
 
     async def get_maps(self):
-        raise NotImplementedError
+        return ["default"]
 
     async def restart(self):
-        raise NotImplementedError
+        self._restart_event.set()
 
 
 
