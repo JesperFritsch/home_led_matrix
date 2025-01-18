@@ -67,7 +67,7 @@ class MsgHandler:
                                 self.default_handler(meth_type, get_key, None)
                             else:
                                 get_value = None
-                                log.debug(f'Invalid message: "{key}"')
+                                log.debug(f'Invalid message: "{get_key}"')
 
                         message[get_key] = get_value
                 else:
