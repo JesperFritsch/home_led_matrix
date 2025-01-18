@@ -58,7 +58,7 @@ class MsgHandler:
                 await asyncio.gather(*tasks)
             elif meth_type == 'get':
                 if 'all' in msgs.keys():
-                    message = {key: getter() for key, getter in self.get_handlers.items()}
+                    message = {key: await getter() for key, getter in self.get_handlers.items()}
                 else:
                     message = {}
                     for get_key, val in msgs.items():
