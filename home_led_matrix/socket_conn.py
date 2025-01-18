@@ -26,7 +26,6 @@ class MsgHandler:
         self.socket_handler = SocketHandler(socket_file, self)
         self.default_handler = None
 
-
     def add_handlers(self, message_key, setter=None, getter=None):
         if setter is not None: self.set_handlers[message_key] = setter
         if getter is not None: self.get_handlers[message_key] = getter

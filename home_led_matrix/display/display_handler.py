@@ -1,7 +1,13 @@
 import logging
 from pathlib import Path
 
-from rgbmatrix import RGBMatrix, RGBMatrixOptions
+
+try:
+    from rgbmatrix import RGBMatrix, RGBMatrixOptions
+except ImportError:
+    from unittest.mock import MagicMock
+    RGBMatrix = MagicMock()
+    RGBMatrixOptions = MagicMock()
 
 from home_led_matrix.utils import SingletonMeta
 
@@ -22,6 +28,9 @@ class DisplayHandler(metaclass=SingletonMeta):
     def set_pixels(self, pixels):
         for (x, y), color in pixels:
             self._matrix.SetPixel(x, y, *color)
+
+    def set_pixel(self, x, y, color):
+        self._matrix.SetPixel(x, y, *color)
 
     def clear(self):
         self._matrix.Clear()

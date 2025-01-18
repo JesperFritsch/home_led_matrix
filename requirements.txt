@@ -1,6 +1,10 @@
 setuptools
 pillow
+numpy
 asyncio
 firebase_admin
 aiohttp
 websockets
+grpcio
+grpcio-tools
+grpc-tools
