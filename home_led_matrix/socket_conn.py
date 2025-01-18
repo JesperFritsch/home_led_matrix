@@ -88,15 +88,18 @@ class MsgHandler:
                                 log.debug(f'Invalid message: "{key}"')
                     message[get_key] = get_value
             elif meth_type == 'action':
+                message = {}
                 for key, value in msgs.items():
                     try:
                         tasks.append(asyncio.create_task(self.action_handlers[key]()))
+                        message[key] = True
                     except KeyError:
                         if self.default_handler is not None:
                             self.default_handler(meth_type, key, value)
                         else:
                             log.debug(f'Invalid message: "{key}"')
-                await asyncio.gather
+                        message[key] = False
+                await asyncio.gather(*tasks)
         return message
 
     def start(self):
@@ -150,11 +153,11 @@ class SocketHandler:
                             log.debug('Connection closed')
                             break
 
-                except asyncio.CancelledError as e:
-                    log.error("Cancelled error")
-                    log.error("TRACE", exc_info=True)
+                except (asyncio.CancelledError, KeyboardInterrupt):
+                    pass
 
                 finally:
                     writer.close()
                     await writer.wait_closed()
                     self.connections.remove((reader, writer))
+                    break

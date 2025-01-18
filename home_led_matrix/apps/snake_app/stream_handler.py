@@ -33,15 +33,15 @@ class StreamHandler:
         self._stream_task = None
 
     async def start_stream(self, run_id, host, port):
-        uri = f"ws://{host}:{port}/watch/{run_id}"
+        uri = f"ws://{host}:{port}/ws/watch/{run_id}"
         await self._connect(uri)
-        self._stream_task = asyncio.create_task(self._recive_task())
+        self._stream_task = asyncio.create_task(self._receive_task())
+        await self._request_init_data()
 
     async def _connect(self, uri):
         log.debug(f'Connecting to {uri}')
         self._websocket = await websockets.connect(uri)
         log.debug('Connected to websocket')
-        await self._request_init_data()
 
     async def _disconnect(self):
         if self._websocket:
@@ -49,23 +49,24 @@ class StreamHandler:
         self._websocket = None
         log.debug('Disconnected from websocket')
 
-    async def _recive_task(self):
+    async def _receive_task(self):
         while True:
             try:
                 data = await self._websocket.recv()
                 if data == 'ping':
                     await self._websocket.send('ping'.encode())
                 else:
-                    self.process_message(data)
+                    await self.process_message(data)
             except websockets.exceptions.ConnectionClosed as e:
                 print(f"Connection closed: {e}")
                 break
-            except asyncio.CancelledError:
+            except (asyncio.CancelledError, KeyboardInterrupt):
                 break
 
-    def process_message(self, data):
+    async def process_message(self, data):
         msg = MsgWrapper()
         msg.ParseFromString(data)
+        log.debug(f"recieved message: {msg}")
         if msg.type == MessageType.PIXEL_CHANGES:
             pixel_changes = PixelChanges()
             pixel_changes.ParseFromString(msg.data)
@@ -73,14 +74,14 @@ class StreamHandler:
             self._recieved_data.append(pixel_changes)
             self._recieved_steps += 1
             if self._recieved_steps >= self._final_step:
-                self.stop()
+                await self.stop()
         if msg.type == MessageType.RUN_META_DATA:
             global meta_data
             meta_data = RunMetaData()
             meta_data.ParseFromString(msg.payload)
             self._init_data = meta_data
             self._init_data_recieved.set()
-        if msg.type == MessageType.RunUpdate:
+        if msg.type == MessageType.RUN_UPDATE:
             run_update = RunUpdate()
             run_update.ParseFromString(msg.payload)
             self._final_step = run_update.final_step
@@ -92,7 +93,7 @@ class StreamHandler:
             end_step = start_step + 10
             self._last_requested_step = end_step
             req = Request(
-                type=RequestType.STEP_DATA_REQ,
+                type=RequestType.PIXEL_CHANGES_REQ,
                 payload=PixelChangesReq(start_step=start_step, end_step=end_step).SerializeToString()
             )
             await self.send(req.SerializeToString())
@@ -100,6 +101,7 @@ class StreamHandler:
             log.error(e)
 
     async def _request_init_data(self):
+        self._init_data_recieved.clear()
         await self.send(
             Request(
                 type=RequestType.RUN_META_DATA_REQ,
@@ -133,9 +135,11 @@ class StreamHandler:
         return self._stream_task is None or self._stream_task.done()
 
 async def request_run(host, port, config) -> str:
+    uri = f'http://{host}:{port}/api/request_run'
+    log.debug(f"Posting to: {uri}")
     try:
         async with aiohttp.ClientSession() as session:
-            async with session.post(f'http://{host}:{port}/request_run', json=config) as resp:
+            async with session.post(uri, json=config) as resp:
                 if resp.status == 200:
                     resp_json = await resp.json()
                     if resp_json['result'] != 'success':

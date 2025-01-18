@@ -20,9 +20,9 @@ class SnakeApp(IAsyncApp):
         self._stream_handler = StreamHandler()
         self._nr_snakes = 7
         self._food = 15
-        self._food_decay = None
+        self._food_decay = 0
         self._fps = 10
-        self._map = None
+        self._map = ""
         self._current_run_id = None
         self._unpaused_event = asyncio.Event()
         self._restart_event = asyncio.Event()
@@ -41,23 +41,29 @@ class SnakeApp(IAsyncApp):
                 self._restart_event.clear()
                 await self._request_new_run()
                 await self._start_stream(self._current_run_id)
+                log.debug("starting loop")
                 await self._display_loop()
                 # Let the final state be displayed for 10 seconds
                 await asyncio.sleep(10)
         except asyncio.CancelledError:
-            self.stop()
+            await self.stop()
 
     async def _request_new_run(self):
         config = {
-            'nr_snakes': self._nr_snakes,
+            'snake_count': self._nr_snakes,
             'food': self._food,
             'food_decay': self._food_decay,
-            'fps': self._fps,
-            'map': self._map
+            'map': "" if self._map is None or "default" else self._map,
+            'grid_height': 20,
+            'grid_width': 20,
+            'start_length': 3
+
         }
+        log.debug(f"requesting run with config: {config}")
         self._current_run_id = await request_run(self._host, self._port, config)
         if self._current_run_id is None:
-            raise Exception("Could not start run")
+            log.error("Failed to request run, stopping everything")
+            raise asyncio.CancelledError
 
     async def _start_stream(self, run_id):
         await self._stream_handler.start_stream(run_id, self._host, self._port)
@@ -89,12 +95,14 @@ class SnakeApp(IAsyncApp):
             if not self._unpaused_event.is_set():
                 await self._unpaused_event.wait()
             pixel_changes = await self._stream_handler.get_next_pixel_change()
+            log.debug(f"Pixel changes: {pixel_changes}")
             if pixel_changes is None:
                 if self._stream_handler.is_done():
                     break
                 await asyncio.sleep(0.1)
                 continue
             self._update_display(pixel_changes)
+            await asyncio.sleep(1 / self._fps)
 
     def _update_display(self, pixel_changes):
         for x, y, color in pixel_changes:
@@ -103,19 +111,17 @@ class SnakeApp(IAsyncApp):
 
     async def run(self):
         log.debug("Starting snake app")
+        self._unpaused_event.set()
+        self._restart_event.clear()
+        self._stop_event.clear()
         try:
             await self.main_loop()
         except asyncio.CancelledError:
-            pass
+            await self.stop()
 
     async def stop(self):
         self._stop_event.set()
-        if self._stream_task:
-            self._stream_task.cancel()
-            try:
-                await self._stream_task
-            except asyncio.CancelledError:
-                pass
+        await self._stream_handler.stop()
 
     async def pause(self):
         self._unpaused_event.clear()
@@ -166,7 +172,7 @@ class SnakeApp(IAsyncApp):
         return self._nr_snakes
 
     async def get_maps(self):
-        return ["default"]
+        return []
 
     async def restart(self):
         self._restart_event.set()

@@ -10,24 +10,20 @@ class PixelArtApp(IAsyncApp):
 
     async def run(self):
         self._is_running = True
-        raise NotImplementedError
 
     async def stop(self):
         self._is_running = False
         self.display_handler.clear()
-        raise NotImplementedError
 
     async def pause(self):
         self._is_running = False
         self.display_handler.clear()
-        raise NotImplementedError
 
     async def resume(self):
         self._is_running = True
-        raise NotImplementedError
 
     async def redraw(self):
-        raise NotImplementedError
+        pass
 
     async def is_running(self):
         return self._is_running

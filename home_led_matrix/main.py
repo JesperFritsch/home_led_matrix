@@ -74,7 +74,7 @@ async def main(args):
 
         # Common message handlers
         msg_handler.add_handlers("app", app_handler.switch_app, app_handler.get_current_app)
-        msg_handler.add_handlers("apps", app_handler.get_apps)
+        msg_handler.add_handlers("apps", getter=app_handler.get_apps)
         msg_handler.add_handlers("brightness", app_handler.set_brightness, display_handler.get_brightness)
         msg_handler.add_handlers("display_on", app_handler.display_on, app_handler.get_display_on)
 
@@ -92,9 +92,6 @@ async def main(args):
         await app_handler.switch_app("snakes")
         msg_task = msg_handler.start()
         await asyncio.gather(msg_task)
-    except Exception as e:
-        log.error(e)
-        raise e
     finally:
         display_handler.clear()
         try:
@@ -112,4 +109,7 @@ async def main(args):
 if __name__ == "__main__":
     args = cli(sys.argv[1:])
     setup_logging(args.log_level, args.log_out, args.log_file)
-    asyncio.run(main(args))
+    try:
+        asyncio.run(main(args))
+    except KeyboardInterrupt:
+        pass
