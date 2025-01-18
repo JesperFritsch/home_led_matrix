@@ -31,13 +31,13 @@ DEFAULT_IMAGE_DIR = conf["PIXELART_APP"]["image_dir"]
 # Global singletons
 display_handler = DisplayHandler()
 
-def setup_logging(log_level, log_out):
+def setup_logging(log_level, log_out, log_file):
     log_level = getattr(logging, log_level.upper())
     logging.basicConfig(
         level=log_level,
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
         handlers=[
-            logging.FileHandler(DEFAULT_LOG_FILE),
+            logging.FileHandler(log_file),
             logging.StreamHandler(sys.stdout) if log_out else None
         ]
     )
@@ -111,5 +111,5 @@ async def main(args):
 
 if __name__ == "__main__":
     args = cli(sys.argv[1:])
-    setup_logging(args.log_level, args.log_out)
+    setup_logging(args.log_level, args.log_out, args.log_file)
     asyncio.run(main(args))
