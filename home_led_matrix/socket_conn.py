@@ -63,9 +63,9 @@ class MsgHandler:
                     message = {}
                     for get_key, val in msgs.items():
                         try:
-                            get_value = self.get_handlers[get_key](val)
+                            get_value = await self.get_handlers[get_key](val)
                         except TypeError:
-                            get_value = self.get_handlers[get_key]()
+                            get_value = await self.get_handlers[get_key]()
                         except KeyError:
                             if self.default_handler is not None:
                                 self.default_handler(meth_type, get_key, val)

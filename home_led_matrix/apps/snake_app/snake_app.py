@@ -1,10 +1,14 @@
 import asyncio
 import numpy as np
+import logging
+from pathlib import Path
 from typing import Optional
 
 from home_led_matrix.display.display_handler import DisplayHandler
 from home_led_matrix.apps.app_interface import IAsyncApp
 from home_led_matrix.apps.snake_app.stream_handler import StreamHandler, request_run
+
+log = logging.getLogger(Path(__file__).stem)
 
 display_handler = DisplayHandler()
 
@@ -98,6 +102,7 @@ class SnakeApp(IAsyncApp):
             self._last_frame[y, x] = color
 
     async def run(self):
+        log.debug("Starting snake app")
         try:
             await self.main_loop()
         except asyncio.CancelledError:
