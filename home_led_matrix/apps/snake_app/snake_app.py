@@ -77,7 +77,7 @@ class SnakeApp(IAsyncApp):
             for x in range(init_data.width):
                 color = color_mapping[base_map[y, x]]
                 self._last_frame[y, x] = color
-        self._display_frame(self._last_frame)
+        await self._display_frame(self._last_frame)
 
     def get_color_mapping(self, init_data):
         return {int(k): (v.r, v.g, v.b) for k, v in init_data.color_mapping.items()}

@@ -43,7 +43,6 @@ class AppHandler:
                     await self._current_app_task
                 except asyncio.CancelledError:
                     pass
-            self._is_running = False
             self._current_app_task = None
             self._current_app_name = None
 
@@ -71,9 +70,9 @@ class AppHandler:
     async def get_brightness(self):
         return display_handler.get_brightness()
 
-    async def display_on(self):
+    async def display_on(self, value):
         if app := self._get_current_app():
-            if await app.is_running():
+            if value:
                 await app.pause()
                 display_handler.clear()
             else:
