@@ -62,6 +62,7 @@ class MsgHandler:
                 if 'all' in msgs.keys():
                     message = {}
                     for get_key, getter in self.get_handlers.items():
+                        log.debug(f"Getting {get_key}")
                         try:
                             get_value = await getter()
                         except (KeyError, TypeError):
