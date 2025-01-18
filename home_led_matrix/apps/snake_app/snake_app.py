@@ -35,7 +35,7 @@ class SnakeApp(IAsyncApp):
             while True:
                 if self._stop_event.is_set():
                     break
-                if not self._is_running:
+                if not self._unpaused_event.is_set():
                     await self._unpaused_event.wait()
                 self._restart_event.clear()
                 await self._request_new_run()
@@ -56,7 +56,6 @@ class SnakeApp(IAsyncApp):
         }
         self._current_run_id = await request_run(self._host, self._port, config)
         if self._current_run_id is None:
-            self._is_running = False
             raise Exception("Could not start run")
 
     async def _start_stream(self, run_id):
