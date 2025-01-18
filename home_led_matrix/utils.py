@@ -1,4 +1,9 @@
 
+import logging
+from pathlib import Path
+
+log = logging.getLogger(Path(__file__).stem)
+
 
 class DotDict(dict):
     def __getattr__(self, attr):
@@ -31,3 +36,14 @@ class SingletonMeta(type):
             cls._instances[cls] = instance
         return cls._instances[cls]
 
+
+def convert_arg(type):
+    def decorator(func):
+        async def wrapper(self, value):
+            try:
+                value = type(value)
+            except ValueError:
+                log.error(f"Invalid value for {func.__name__}: {value if value is not None else 'None'}")
+            return await func(self, value)
+        return wrapper
+    return decorator

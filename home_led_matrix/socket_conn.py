@@ -23,12 +23,14 @@ class MsgHandler:
     def __init__(self, socket_file) -> None:
         self.set_handlers = DotDict()
         self.get_handlers = DotDict()
+        self.action_handlers = DotDict()
         self.socket_handler = SocketHandler(socket_file, self)
         self.default_handler = None
 
-    def add_handlers(self, message_key, setter=None, getter=None):
+    def add_handlers(self, message_key, setter=None, getter=None, action=None):
         if setter is not None: self.set_handlers[message_key] = setter
         if getter is not None: self.get_handlers[message_key] = getter
+        if action is not None: self.action_handlers[message_key] = action
 
     def _default_handler(self, meth_type, key, value):
         log.debug(f"Invalid/Unhandled message: {meth_type} {key} {value}")
@@ -84,6 +86,16 @@ class MsgHandler:
                                 get_value = None
                                 log.debug(f'Invalid message: "{key}"')
                     message[get_key] = get_value
+            elif meth_type == 'action':
+                for key, value in msgs.items():
+                    try:
+                        tasks.append(asyncio.create_task(self.action_handlers[key]()))
+                    except KeyError:
+                        if self.default_handler is not None:
+                            self.default_handler(meth_type, key, value)
+                        else:
+                            log.debug(f'Invalid message: "{key}"')
+                await asyncio.gather
         return message
 
     def start(self):

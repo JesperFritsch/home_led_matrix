@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 from typing import Optional
 
+from home_led_matrix.utils import convert_arg
 from home_led_matrix.display.display_handler import DisplayHandler
 from home_led_matrix.apps.app_interface import IAsyncApp
 from home_led_matrix.apps.snake_app.stream_handler import StreamHandler, request_run
@@ -129,30 +130,35 @@ class SnakeApp(IAsyncApp):
     async def is_running(self):
         return self._unpaused_event is None or self._unpaused_event.is_set()
 
+    @convert_arg(int)
     async def set_food(self, value):
         self._food = value
 
     async def get_food(self):
         return self._food
 
+    @convert_arg(int)
     async def set_food_decay(self, value):
         self._food_decay = value
 
     async def get_food_decay(self):
         return self._food_decay
 
+    @convert_arg(int)
     async def set_fps(self, value):
         self._fps = value
 
     async def get_fps(self):
         return self._fps
 
+    @convert_arg(str)
     async def set_map(self, value):
         self._map = value
 
     async def get_map(self):
         return self._map
 
+    @convert_arg(int)
     async def set_nr_snakes(self, value):
         self._nr_snakes = value
 

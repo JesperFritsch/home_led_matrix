@@ -80,6 +80,10 @@ class AppHandler:
                 await app.resume()
                 await app.redraw()
 
+    async def get_display_on(self):
+        if app := self._get_current_app():
+            return await app.is_running()
+
     async def get_apps(self) -> List[str]:
         return list(self._apps.keys())
 

@@ -76,7 +76,7 @@ async def main(args):
         msg_handler.add_handlers("app", app_handler.switch_app, app_handler.get_current_app)
         msg_handler.add_handlers("apps", app_handler.get_apps)
         msg_handler.add_handlers("brightness", app_handler.set_brightness, display_handler.get_brightness)
-        msg_handler.add_handlers("display_on", app_handler.display_on, )
+        msg_handler.add_handlers("display_on", app_handler.display_on, app_handler.get_display_on)
 
         # Snake app message handlers
         msg_handler.add_handlers('food', snake_app.set_food, snake_app.get_food)
@@ -84,7 +84,7 @@ async def main(args):
         msg_handler.add_handlers('snakes_fps', snake_app.set_fps, snake_app.get_fps)
         msg_handler.add_handlers('snake_map', snake_app.set_map, snake_app.get_map)
         msg_handler.add_handlers('snake_maps', getter=snake_app.get_maps)
-        msg_handler.add_handlers('restart_snakes', setter=snake_app.restart)
+        msg_handler.add_handlers('restart_snakes', action=snake_app.restart)
         msg_handler.add_handlers('food_decay', snake_app.set_food_decay, snake_app.get_food_decay)
 
         # Pixel Art app message handlers
