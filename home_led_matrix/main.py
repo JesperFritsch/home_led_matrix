@@ -111,5 +111,5 @@ async def main(args):
 
 if __name__ == "__main__":
     args = cli(sys.argv[1:])
-    setup_logging(args.log_level)
+    setup_logging(args.log_level, args.log_out)
     asyncio.run(main(args))
