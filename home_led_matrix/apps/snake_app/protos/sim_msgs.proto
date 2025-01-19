@@ -82,8 +82,12 @@ message MsgWrapper {
     bytes payload = 2;
 }
 
-message PixelChanges {
+message StepPixelChanges {
     int32 step = 1;
+    repeated PixelChanges changes = 2;
+}
+
+message PixelChanges {
     repeated PixelData pixels = 2;
     bool full_state = 3;
 }

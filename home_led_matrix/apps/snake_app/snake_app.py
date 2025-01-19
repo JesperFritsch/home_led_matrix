@@ -51,13 +51,12 @@ class SnakeApp(IAsyncApp):
     async def _request_new_run(self):
         config = {
             'snake_count': self._nr_snakes,
-            'food': self._food,
+            'food': 1000,
             'food_decay': self._food_decay,
             'map': "" if self._map is None or "default" else self._map,
-            'grid_height': 20,
-            'grid_width': 20,
+            'grid_height': 32,
+            'grid_width': 32,
             'start_length': 3
-
         }
         log.debug(f"requesting run with config: {config}")
         self._current_run_id = await request_run(self._host, self._port, config)
@@ -78,7 +77,7 @@ class SnakeApp(IAsyncApp):
     async def load_map(self, init_data):
         base_map = np.frombuffer(bytes(init_data.base_map), dtype=np.uint8).reshape(init_data.height, init_data.width)
         color_mapping = self.get_color_mapping(init_data)
-        self._last_frame = np.zeros((init_data.height, init_data.width, 3), dtype=np.uint8)
+        self._last_frame = np.zeros((init_data.height * 2, init_data.width * 2, 3), dtype=np.uint8)
         for y in range(init_data.height):
             for x in range(init_data.width):
                 color = color_mapping[base_map[y, x]]
@@ -89,20 +88,23 @@ class SnakeApp(IAsyncApp):
         return {int(k): (v.r, v.g, v.b) for k, v in init_data.color_mapping.items()}
 
     async def _display_loop(self):
+        changes_queue = None
         while True:
             if self._restart_event.is_set() or self._stop_event.is_set():
                 break
             if not self._unpaused_event.is_set():
                 await self._unpaused_event.wait()
-            pixel_changes = await self._stream_handler.get_next_pixel_change()
-            if pixel_changes is None:
+            if not changes_queue:
+                step_pixel_changes = await self._stream_handler.get_next_step_pixel_change()
+            if step_pixel_changes is None:
                 if self._stream_handler.is_done():
-                    log.debug("Stream is done")
+                    log.debug("Run is finished")
                     break
                 await asyncio.sleep(0.1)
                 continue
-            log.debug(f"Pixel changes: {pixel_changes.pixel_data}")
-            self._update_display(pixel_changes.pixel_data)
+            changes_queue = step_pixel_changes.pixel_data
+            current_pixel_changes = changes_queue.popleft()
+            self._update_display(current_pixel_changes)
             await asyncio.sleep(1 / self._fps)
 
     def _update_display(self, pixel_changes):
