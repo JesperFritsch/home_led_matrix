@@ -95,13 +95,14 @@ class SnakeApp(IAsyncApp):
             if not self._unpaused_event.is_set():
                 await self._unpaused_event.wait()
             pixel_changes = await self._stream_handler.get_next_pixel_change()
-            log.debug(f"Pixel changes: {pixel_changes}")
+            log.debug(f"Pixel changes: {pixel_changes.pixel_data}")
             if pixel_changes is None:
                 if self._stream_handler.is_done():
+                    log.debug("Stream is done")
                     break
                 await asyncio.sleep(0.1)
                 continue
-            self._update_display(pixel_changes)
+            self._update_display(pixel_changes.pixel_data)
             await asyncio.sleep(1 / self._fps)
 
     def _update_display(self, pixel_changes):

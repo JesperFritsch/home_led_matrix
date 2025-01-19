@@ -83,8 +83,9 @@ message MsgWrapper {
 }
 
 message PixelChanges {
-    repeated PixelData pixels = 1;
-    bool full_state = 2;
+    int32 step = 1;
+    repeated PixelData pixels = 2;
+    bool full_state = 3;
 }
 
 message PixelData {
