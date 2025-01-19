@@ -102,7 +102,7 @@ class StreamHandler:
             run_update.ParseFromString(msg.payload)
             self._final_step = run_update.final_step
             log.debug(f"Final step: {self._final_step}")
-        if msg.type == MessageType.BadRequest:
+        if msg.type == MessageType.BAD_REQUEST:
             bad_request = BadRequest()
             bad_request.ParseFromString(msg.payload)
             log.error(f"Bad request: {bad_request}")
