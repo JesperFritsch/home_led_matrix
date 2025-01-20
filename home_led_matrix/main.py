@@ -86,6 +86,7 @@ async def main(args):
         msg_handler.add_handlers('snake_maps', getter=snake_app.get_maps)
         msg_handler.add_handlers('restart_snakes', action=snake_app.restart)
         msg_handler.add_handlers('food_decay', snake_app.set_food_decay, snake_app.get_food_decay)
+        msg_handler.add_handlers('nr_count', snake_app.set_nr_snakes, snake_app.get_nr_snakes)
 
         # Pixel Art app message handlers
 
