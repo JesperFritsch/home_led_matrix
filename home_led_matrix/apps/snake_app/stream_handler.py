@@ -2,6 +2,7 @@ import logging
 import aiohttp
 import asyncio
 import websockets
+from home_led_matrix.utils import async_post_request
 from typing import List, Tuple, Dict, Optional, Deque
 from pathlib import Path
 from collections import deque
@@ -229,7 +230,7 @@ class StreamHandler:
         self._stream_task = None
         self._last_added_to_buffer = None
 
-    async def _finish_stream(self):
+    def _finish_stream(self):
         log.debug("Stream is stopped internally")
         self._stream_finished_event.set()
 
@@ -245,21 +246,13 @@ class StreamHandler:
     def is_done(self):
         return self._stream_task is None or self._stream_task.done()
 
+
 async def request_run(host, port, config) -> str:
     uri = f'http://{host}:{port}/api/request_run'
     log.debug(f"Posting to: {uri}")
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.post(uri, json=config) as resp:
-                if resp.status == 200:
-                    resp_json = await resp.json()
-                    if resp_json['result'] != 'success':
-                        log.error(f"Server could not start run with config: {config}")
-                        return None
-                    else:
-                        return resp_json['run_id']
-                else:
-                    log.error(f"Server returned: {resp.status}")
-                    log.debug(await resp.text())
-    except Exception as e:
-        log.error(e)
+    resp = await async_post_request(uri, config)
+    if resp["result"] == "success":
+        return resp.get('run_id')
+    else:
+        log.error(f"Failed to request run: {resp}")
+        return None

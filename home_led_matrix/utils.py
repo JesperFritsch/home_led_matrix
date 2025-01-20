@@ -1,5 +1,7 @@
 
 import logging
+import aiohttp
+
 from pathlib import Path
 
 log = logging.getLogger(Path(__file__).stem)
@@ -47,3 +49,29 @@ def convert_arg(type):
             return await func(self, value)
         return wrapper
     return decorator
+
+
+async def async_get_request(uri):
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(uri) as resp:
+                if resp.status == 200:
+                    return await resp.json()
+                else:
+                    log.error(f"Server returned: {resp.status}")
+                    log.debug(await resp.text())
+    except Exception as e:
+        log.error(e)
+
+
+async def async_post_request(uri, data):
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(uri, json=data) as resp:
+                if resp.status == 200:
+                    return await resp.json()
+                else:
+                    log.error(f"Server returned: {resp.status}")
+                    log.debug(await resp.text())
+    except Exception as e:
+        log.error(e)
