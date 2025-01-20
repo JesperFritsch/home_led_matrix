@@ -41,7 +41,6 @@ class SnakeApp(IAsyncApp):
                 self._restart_event.clear()
                 await self._request_new_run()
                 await self._start_stream(self._current_run_id)
-                log.debug("starting loop")
                 await self._display_loop()
                 # Let the final state be displayed for 10 seconds
                 if not (self._stop_event.is_set() or self._restart_event.is_set()):
@@ -54,7 +53,7 @@ class SnakeApp(IAsyncApp):
             'snake_count': self._nr_snakes,
             'food': self._food,
             'food_decay': self._food_decay,
-            'map': "" if self._map is None or "default" else self._map,
+            'map': self._map if self._map else self._map,
             'grid_height': 32,
             'grid_width': 32,
             'start_length': 3
