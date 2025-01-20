@@ -122,7 +122,7 @@ class SnakeApp(IAsyncApp):
     def _update_display(self, pixel_changes):
         for x, y, color in pixel_changes:
             display_handler.set_pixel(x, y, color)
-            self._last_frame[y, x] = color
+            # self._last_frame[y, x] = color
 
     async def run(self):
         log.debug("Starting snake app")
