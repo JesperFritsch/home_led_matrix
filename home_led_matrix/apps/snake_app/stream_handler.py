@@ -48,15 +48,13 @@ class StreamHandler:
         self._final_step = None
         self._init_data_recieved = asyncio.Event()
         self._stream_finished_event = asyncio.Event()
-        self._receive_task = None
-        self._request_task = None
+        self._stream_task = None
 
     async def start_stream(self, run_id, host, port):
         self._reset()
         uri = f"ws://{host}:{port}/ws/watch/{run_id}"
         await self._connect(uri)
-        self._receive_task = asyncio.create_task(self._receive_loop())
-        self._request_task = asyncio.create_task(self._request_loop())
+        self._stream_task = asyncio.create_task(self._receive_loop())
         await self._request_init_data()
 
     async def _connect(self, uri):
@@ -92,11 +90,6 @@ class StreamHandler:
             log.debug("TRACE: ", exc_info=True)
         finally:
             await self._disconnect()
-
-    async def _request_loop(self):
-        while not self._stream_finished_event.is_set():
-            await self._request_more_if_needed()
-            await asyncio.sleep(0)
 
     async def process_message(self, data):
         msg = MsgWrapper()
@@ -189,11 +182,11 @@ class StreamHandler:
 
     async def _request_more_if_needed(self):
         # check if we need to request more data, could be missing steps or just need more data
-        # log.debug(f"Buffer len: {len(self._recieved_data)}, threshold: {(self._min_buffer_size - self._min_batch_size)}")
-        # log.debug(f"staged DATA: {list(self._staging_data.keys())}")
-        # log.debug(f"Received steps: {list(self._received_steps)}")
-        # log.debug(f"Requested steps: {list(self._requested_steps)}")
-        # log.debug(f"last added to buffer: {self._last_added_to_buffer}")
+        log.debug(f"Buffer len: {len(self._recieved_data)}, threshold: {(self._min_buffer_size - self._min_batch_size)}")
+        log.debug(f"staged DATA: {list(self._staging_data.keys())}")
+        log.debug(f"Received steps: {list(self._received_steps)}")
+        log.debug(f"Requested steps: {list(self._requested_steps)}")
+        log.debug(f"last added to buffer: {self._last_added_to_buffer}")
         if self._final_step is not None and max(self._requested_steps) >= self._final_step:
             return
         if len(self._recieved_data) < (self._min_buffer_size - self._min_batch_size):
@@ -236,8 +229,7 @@ class StreamHandler:
         self._requested_steps = set()
         self._staging_data = {}
         self._final_step = None
-        self._receive_task = None
-        self._request_task = None
+        self._stream_task = None
         self._last_added_to_buffer = None
 
     async def _finish_stream(self):
@@ -245,22 +237,16 @@ class StreamHandler:
         self._stream_finished_event.set()
 
     async def stop(self):
-        log.debug("Stream is stopped from outside")
-        if self._receive_task is not None:
-            self._receive_task.cancel()
+        if self._stream_task is not None:
+            log.debug("Stream is stopped from outside")
+            self._stream_task.cancel()
             try:
-                await self._receive_task
-            except asyncio.CancelledError:
-                pass
-        if self._request_task is not None:
-            self._request_task.cancel()
-            try:
-                await self._request_task
+                await self._stream_task
             except asyncio.CancelledError:
                 pass
 
     def is_done(self):
-        return self._receive_task is None or self._receive_task.done()
+        return self._stream_task is None or self._stream_task.done()
 
 async def request_run(host, port, config) -> str:
     uri = f'http://{host}:{port}/api/request_run'
