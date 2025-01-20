@@ -182,11 +182,11 @@ class StreamHandler:
 
     async def _request_more_if_needed(self):
         # check if we need to request more data, could be missing steps or just need more data
-        # log.debug(f"Buffer len: {len(self._recieved_data)}, threshold: {(self._min_buffer_size - self._min_batch_size)}")
-        # log.debug(f"staged DATA: {list(self._staging_data.keys())}")
-        # log.debug(f"Received steps: {list(self._received_steps)}")
-        # log.debug(f"Requested steps: {list(self._requested_steps)}")
-        # log.debug(f"last added to buffer: {self._last_added_to_buffer}")
+        log.debug(f"Buffer len: {len(self._recieved_data)}, threshold: {(self._min_buffer_size - self._min_batch_size)}")
+        log.debug(f"staged DATA: {list(self._staging_data.keys())}")
+        log.debug(f"Received steps: {list(self._received_steps)}")
+        log.debug(f"Requested steps: {list(self._requested_steps)}")
+        log.debug(f"last added to buffer: {self._last_added_to_buffer}")
         if self._final_step is not None and max(self._requested_steps) >= self._final_step:
             return
         if len(self._recieved_data) < (self._min_buffer_size - self._min_batch_size):

@@ -51,7 +51,7 @@ class SnakeApp(IAsyncApp):
     async def _request_new_run(self):
         config = {
             'snake_count': self._nr_snakes,
-            'food': 1000,
+            'food': self._food,
             'food_decay': self._food_decay,
             'map': "" if self._map is None or "default" else self._map,
             'grid_height': 32,
