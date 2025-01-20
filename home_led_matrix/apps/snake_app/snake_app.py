@@ -44,7 +44,8 @@ class SnakeApp(IAsyncApp):
                 log.debug("starting loop")
                 await self._display_loop()
                 # Let the final state be displayed for 10 seconds
-                await asyncio.sleep(10)
+                if not (self._stop_event.is_set() or self._restart_event.is_set()):
+                    await asyncio.sleep(10)
         except asyncio.CancelledError:
             await self.stop()
 
@@ -179,6 +180,7 @@ class SnakeApp(IAsyncApp):
 
     async def restart(self):
         self._restart_event.set()
+        await self._stream_handler.stop()
 
 
 

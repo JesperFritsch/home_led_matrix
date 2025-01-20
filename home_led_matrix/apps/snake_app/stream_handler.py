@@ -75,7 +75,7 @@ class StreamHandler:
                     if data == 'ping':
                         await self._websocket.send('ping'.encode())
                     else:
-                        await self.process_message(data)
+                        self.process_message(data)
                 await asyncio.sleep(0) # yield controll to the main loop
         except websockets.exceptions.ConnectionClosedOK:
             log.debug("Connection closed normally")
@@ -91,14 +91,14 @@ class StreamHandler:
         finally:
             await self._disconnect()
 
-    async def process_message(self, data):
+    def process_message(self, data):
         msg = MsgWrapper()
         msg.ParseFromString(data)
         log.debug(f"recieved message: Type = {MessageType.Name(msg.type)}")
         if msg.type == MessageType.PIXEL_CHANGES:
             pixel_changes = StepPixelChanges()
             pixel_changes.ParseFromString(msg.payload)
-            await self._handle_pixel_changes(pixel_changes)
+            self._handle_pixel_changes(pixel_changes)
         if msg.type == MessageType.RUN_META_DATA:
             global meta_data
             meta_data = RunMetaData()
@@ -115,7 +115,7 @@ class StreamHandler:
             bad_request.ParseFromString(msg.payload)
             log.error(f"Bad request: {bad_request}")
 
-    async def _handle_pixel_changes(self, step_pixel_changes: StepPixelChanges):
+    def _handle_pixel_changes(self, step_pixel_changes: StepPixelChanges):
         self._received_steps.add(step_pixel_changes.step)
         pixel_changes_data = deque()
         for change in step_pixel_changes.changes:
@@ -133,7 +133,7 @@ class StreamHandler:
         else:
             self._staging_data[step_pixel_changes.step] = step_pixel_changes_obj
         if self._final_step is not None and self._last_added_to_buffer >= self._final_step:
-            await self._finish_stream()
+            self._finish_stream()
         self._move_staged_data()
 
     def _add_to_recieved_data(self, step_pixel_changes_data: StepPixelChangesData):
@@ -184,9 +184,6 @@ class StreamHandler:
         # check if we need to request more data, could be missing steps or just need more data
         log.debug(f"Buffer len: {len(self._recieved_data)}, threshold: {(self._min_buffer_size - self._min_batch_size)}")
         log.debug(f"staged DATA: {list(self._staging_data.keys())}")
-        log.debug(f"Received steps: {list(self._received_steps)}")
-        log.debug(f"Requested steps: {list(self._requested_steps)}")
-        log.debug(f"last added to buffer: {self._last_added_to_buffer}")
         if self._final_step is not None and max(self._requested_steps) >= self._final_step:
             return
         if len(self._recieved_data) < (self._min_buffer_size - self._min_batch_size):
