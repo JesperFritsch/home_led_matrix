@@ -176,7 +176,7 @@ class SnakeApp(IAsyncApp):
         return self._nr_snakes
 
     async def get_maps(self):
-        return await async_get_request(f"http://{self._host}:{self._port}/map_names")
+        return await async_get_request(f"http://{self._host}:{self._port}/api/map_names")
 
     async def restart(self):
         self._restart_event.set()
