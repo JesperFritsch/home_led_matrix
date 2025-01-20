@@ -37,7 +37,7 @@ class StepPixelChangesData:
 class StreamHandler:
     def __init__(self) -> None:
         self._websocket = None
-        self._min_buffer_size = 30
+        self._min_buffer_size = 5
         self._min_batch_size = 1
         self._recieved_data: deque[StepPixelChangesData] = deque()
         self._staging_data: Dict[int, StepPixelChangesData] = {}
