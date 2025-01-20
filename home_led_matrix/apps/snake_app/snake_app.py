@@ -122,7 +122,7 @@ class SnakeApp(IAsyncApp):
     def _update_display(self, pixel_changes):
         for x, y, color in pixel_changes:
             display_handler.set_pixel(x, y, color)
-            # self._last_frame[y, x] = color
+            self._last_frame[y, x] = color
 
     async def run(self):
         log.debug("Starting snake app")
@@ -145,7 +145,7 @@ class SnakeApp(IAsyncApp):
 
     async def redraw(self):
         display_handler.clear()
-        self._display_frame(self._last_frame)
+        await self._display_frame(self._last_frame)
 
     async def is_running(self):
         return self._unpaused_event is None or self._unpaused_event.is_set()
