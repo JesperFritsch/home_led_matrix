@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from typing import Optional
 
-from home_led_matrix.utils import convert_arg
+from home_led_matrix.utils import convert_arg, async_get_request
 from home_led_matrix.display.display_handler import DisplayHandler
 from home_led_matrix.apps.app_interface import IAsyncApp
 from home_led_matrix.apps.snake_app.stream_handler import StreamHandler, request_run
@@ -176,7 +176,7 @@ class SnakeApp(IAsyncApp):
         return self._nr_snakes
 
     async def get_maps(self):
-        return []
+        return await async_get_request(f"http://{self._host}:{self._port}/map_names")
 
     async def restart(self):
         self._restart_event.set()
