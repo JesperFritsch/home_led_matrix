@@ -81,8 +81,12 @@ class SnakeApp(IAsyncApp):
         self._last_frame = np.zeros((init_data.height * 2, init_data.width * 2, 3), dtype=np.uint8)
         for y in range(init_data.height):
             for x in range(init_data.width):
-                color = color_mapping[base_map[y, x]]
-                self._last_frame[y, x] = color
+                if base_map[y, x] == init_data['blocked_value']:
+                    color = color_mapping[base_map[y, x]]
+                    self._last_frame[y*2, x*2] = color
+                    for x_d, y_d in [(1, 0), (0, 1), (-1, ), (0, -1)]:
+                        if base_map[y + y_d, x + x_d] == init_data['blocked_value']:
+                            self._last_frame[y * 2 + y_d, x * 2 + x_d] = color
         await self._display_frame(self._last_frame)
 
     def get_color_mapping(self, init_data):
