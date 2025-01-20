@@ -52,6 +52,7 @@ def convert_arg(type):
 
 
 async def async_get_request(uri):
+    log.debug(f"GET request to {uri}")
     try:
         async with aiohttp.ClientSession() as session:
             async with session.get(uri) as resp:
@@ -65,6 +66,7 @@ async def async_get_request(uri):
 
 
 async def async_post_request(uri, data):
+    log.debug(f"POST request to {uri}")
     try:
         async with aiohttp.ClientSession() as session:
             async with session.post(uri, json=data) as resp:
