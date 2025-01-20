@@ -76,6 +76,7 @@ class StreamHandler:
                         await self._websocket.send('ping'.encode())
                     else:
                         await self.process_message(data)
+                asyncio.sleep(0) # yield controll to the main loop
         except websockets.exceptions.ConnectionClosedOK:
             log.debug("Connection closed normally")
         except websockets.exceptions.ConnectionClosedError as e:
