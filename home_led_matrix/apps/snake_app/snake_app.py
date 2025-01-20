@@ -39,9 +39,12 @@ class SnakeApp(IAsyncApp):
                 if not self._unpaused_event.is_set():
                     await self._unpaused_event.wait()
                 self._restart_event.clear()
-                await self._request_new_run()
-                await self._start_stream(self._current_run_id)
-                await self._display_loop()
+                try:
+                    await self._request_new_run()
+                    await self._start_stream(self._current_run_id)
+                    await self._display_loop()
+                finally:
+                    await self._stream_handler.stop()
                 # Let the final state be displayed for 10 seconds
                 if not (self._stop_event.is_set() or self._restart_event.is_set()):
                     await asyncio.sleep(10)
@@ -133,7 +136,6 @@ class SnakeApp(IAsyncApp):
 
     async def stop(self):
         self._stop_event.set()
-        await self._stream_handler.stop()
 
     async def pause(self):
         self._unpaused_event.clear()
@@ -188,7 +190,6 @@ class SnakeApp(IAsyncApp):
 
     async def restart(self):
         self._restart_event.set()
-        await self._stream_handler.stop()
 
 
 
