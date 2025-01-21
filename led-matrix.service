@@ -9,7 +9,7 @@ Type=simple
 Restart=always
 RestartSec=1
 WorkingDirectory=/home/pi/home_led_matrix
-ExecStart=/usr/bin/env python3 -m home_led_matrix.main
+ExecStart=/home/pi/home_led_matrix/start_matrix.sh
 
 [Install]
 WantedBy=multi-user.target
