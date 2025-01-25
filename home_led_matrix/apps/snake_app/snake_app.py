@@ -88,6 +88,7 @@ class SnakeApp(IAsyncApp):
                     color = color_mapping[base_map[y, x]]
                     exp_x = x * 2 + 1 # expand by 2 offset by 1
                     exp_y = y * 2 + 1
+                    pixel_changes.append((exp_x, exp_y, color))
                     for x_d, y_d in [(1, 0), (0, 1), (-1, 0), (0, -1)]:
                         if not (0 <= y + y_d < init_data.height and 0 <= x + x_d < init_data.width):
                             continue
