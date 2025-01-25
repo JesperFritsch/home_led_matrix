@@ -94,7 +94,7 @@ class SnakeApp(IAsyncApp):
                         if base_map[y + y_d, x + x_d] == init_data.blocked_value:
                             pixel_changes.append((exp_x + x_d, exp_y + y_d, color))
         display_handler.clear()
-        await self._update_display(pixel_changes)
+        self._update_display(pixel_changes)
 
     def get_color_mapping(self, init_data):
         return {int(k): (v.r, v.g, v.b) for k, v in init_data.color_mapping.items()}
