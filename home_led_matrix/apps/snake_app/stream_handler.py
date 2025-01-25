@@ -115,6 +115,8 @@ class StreamHandler:
             bad_request = BadRequest()
             bad_request.ParseFromString(msg.payload)
             log.error(f"Bad request: {bad_request}")
+        if self._final_step is not None and self._last_added_to_buffer >= self._final_step:
+            self._finish_stream()
 
     def _handle_pixel_changes(self, step_pixel_changes: StepPixelChanges):
         self._received_steps.add(step_pixel_changes.step)
@@ -133,8 +135,6 @@ class StreamHandler:
             log.debug(f"Dropping already added step: {step_pixel_changes.step}")
         else:
             self._staging_data[step_pixel_changes.step] = step_pixel_changes_obj
-        if self._final_step is not None and self._last_added_to_buffer >= self._final_step:
-            self._finish_stream()
         self._move_staged_data()
 
     def _add_to_recieved_data(self, step_pixel_changes_data: StepPixelChangesData):
