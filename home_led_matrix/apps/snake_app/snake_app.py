@@ -108,7 +108,7 @@ class SnakeApp(IAsyncApp):
             if not self._unpaused_event.is_set():
                 await self._unpaused_event.wait()
             if not changes_queue:
-                step_pixel_changes = await self._stream_handler.get_next_step_pixel_change()
+                step_pixel_changes = self._stream_handler.get_next_step_pixel_change()
             if step_pixel_changes is None:
                 if self._stream_handler.is_done():
                     log.debug("Run is finished")
