@@ -59,6 +59,7 @@ class StreamHandler:
         await self._connect(uri)
         self._receive_task = asyncio.create_task(self._receive_loop())
         self._request_task = asyncio.create_task(self._request_loop())
+        self._request_more_event.set()
         await self._request_init_data()
 
     async def _connect(self, uri):
