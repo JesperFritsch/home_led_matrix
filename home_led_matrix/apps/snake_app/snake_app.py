@@ -88,12 +88,11 @@ class SnakeApp(IAsyncApp):
                     exp_x = x * 2 + 1 # expand by 2 offset by 1
                     exp_y = y * 2 + 1
                     self._last_frame[exp_y, exp_x] = color
-                    try: # ugly way to handle out of bounds
-                        for x_d, y_d in [(1, 0), (0, 1), (-1, 0), (0, -1)]:
-                            if base_map[y + y_d, x + x_d] == init_data.blocked_value:
-                                self._last_frame[exp_y + y_d, exp_x + x_d] = color
-                    except IndexError:
-                        pass
+                    for x_d, y_d in [(1, 0), (0, 1), (-1, 0), (0, -1)]:
+                        if not (0 <= y + y_d < init_data.height and 0 <= x + x_d < init_data.width):
+                            continue
+                        if base_map[y + y_d, x + x_d] == init_data.blocked_value:
+                            self._last_frame[exp_y + y_d, exp_x + x_d] = color
         await self._display_frame(self._last_frame)
 
     def get_color_mapping(self, init_data):
