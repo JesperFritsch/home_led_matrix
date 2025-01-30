@@ -278,7 +278,7 @@ async def request_run(host, port, config) -> str:
     uri = f'http://{host}:{port}/api/request_run'
     log.debug(f"Posting to: {uri}")
     resp = await async_post_request(uri, config)
-    if resp["result"] == "success":
+    if resp and resp["result"] == "success":
         return resp.get('run_id')
     else:
         log.error(f"Failed to request run: {resp}")

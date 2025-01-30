@@ -147,7 +147,7 @@ class SocketHandler:
                                     writer.write(data)
                                     await writer.drain()
                             except Exception as e:
-                                log.error('Some shit happened: ', e)
+                                log.error('Some shit happened: %s', e)
                                 log.debug(response)
                         else:
                             log.debug('Connection closed')
