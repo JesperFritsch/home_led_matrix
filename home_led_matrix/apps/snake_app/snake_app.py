@@ -174,6 +174,8 @@ class SnakeApp(IAsyncApp):
 
     @convert_arg(str)
     async def set_map(self, value):
+        if value.lower() == "none":
+            value = ""
         self._map = value
 
     async def get_map(self):
