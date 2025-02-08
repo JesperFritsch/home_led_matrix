@@ -5,3 +5,5 @@ requires = [
     "grpcio-tools"
 ]
 build-backend = "setuptools.build_meta"
+packages = ["home_led_matrix"]
+include-package-data = true
