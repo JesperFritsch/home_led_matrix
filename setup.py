@@ -71,7 +71,8 @@ setuptools.setup(
         "firebase_admin",
         "aiohttp",
         "websockets",
-        "pyzmq"
+        "pyzmq",
+        "tornado>=6.1"
         # plus anything else your package needs
     ],
 

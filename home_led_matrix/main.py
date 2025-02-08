@@ -98,8 +98,7 @@ async def main(args):
         # Pixel Art app message handlers
 
         await app_handler.switch_app("snakes")
-        conn_server.start_in_thread()
-        conn_server.wait()
+        await conn_server.start()
     finally:
         display_handler.clear()
         try:
