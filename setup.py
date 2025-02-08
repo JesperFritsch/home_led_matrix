@@ -70,7 +70,8 @@ setuptools.setup(
         "asyncio",
         "firebase_admin",
         "aiohttp",
-        "websockets"
+        "websockets",
+        "pyzmq"
         # plus anything else your package needs
     ],
 

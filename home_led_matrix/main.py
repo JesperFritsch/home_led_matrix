@@ -7,7 +7,8 @@ from importlib import resources
 from pathlib import Path
 
 from home_led_matrix.display.display_handler import DisplayHandler
-from home_led_matrix.socket_conn import MsgHandler
+from home_led_matrix.message_handler import MessageHandler
+from home_led_matrix.connection import ConnServer
 from home_led_matrix.apps.snake_app.snake_app import SnakeApp
 from home_led_matrix.apps.pixelart_app.pixelart_app import PixelArtApp
 from home_led_matrix.apps.app_handler import AppHandler
@@ -21,7 +22,9 @@ log = logging.getLogger(Path(__file__).stem)
 
 DEFAULT_LOG_FILE = conf["LOGGING"]["file"]
 DEFAULT_LOG_LEVEL = conf["LOGGING"]["level"]
-DEFAULT_SOCKET_FILE = conf["SOCKET"]["file"]
+DEFAULT_CONN_ADDR = conf["CONNECTION"]["address"]
+DEFAULT_ROUTE_PORT = conf["CONNECTION"]["route_port"]
+DEFAULT_PUB_PORT = conf["CONNECTION"]["pub_port"]
 # SNAKE APP
 DEFAULT_HOST = conf["SNAKE_APP"]["host"]
 DEFAULT_PORT = conf["SNAKE_APP"]["port"]
@@ -53,7 +56,9 @@ def cli(args):
     pixel_app.add_argument("--image-dir", default=DEFAULT_IMAGE_DIR, help=f"Image directory, default: {DEFAULT_IMAGE_DIR}")
 
     conn = p.add_argument_group("Connection")
-    conn.add_argument("--socket-file", default=DEFAULT_SOCKET_FILE, help=f"Socket file, default: {DEFAULT_SOCKET_FILE}")
+    conn.add_argument("--address", default=DEFAULT_CONN_ADDR, help=f"Socket file, default: {DEFAULT_CONN_ADDR}")
+    conn.add_argument("--route-port", default=DEFAULT_ROUTE_PORT, help=f"Route port, default: {DEFAULT_ROUTE_PORT}")
+    conn.add_argument("--pub-port", default=DEFAULT_PUB_PORT, help=f"Publish port, default: {DEFAULT_PUB_PORT}")
 
     logging = p.add_argument_group("Logging")
     logging.add_argument("--log-level", default=DEFAULT_LOG_LEVEL, help=f"Log level, default: {DEFAULT_LOG_LEVEL}")
@@ -64,7 +69,9 @@ def cli(args):
 
 async def main(args):
     try:
-        msg_handler = MsgHandler(args.socket_file)
+        msg_handler = MessageHandler()
+        conn_server = ConnServer(args.route_port, args.pub_port, args.address)
+        conn_server.set_message_handler(msg_handler)
         snake_app = SnakeApp(args.host, args.port)
         pixelart_app = PixelArtApp(args.image_dir)
         app_handler = AppHandler()
@@ -73,7 +80,7 @@ async def main(args):
         app_handler.add_app("pixelart", pixelart_app)
 
         # Common message handlers
-        msg_handler.add_handlers("app", app_handler.switch_app, app_handler.get_current_app)
+        msg_handler.add_handlers("current_app", app_handler.switch_app, app_handler.get_current_app)
         msg_handler.add_handlers("apps", getter=app_handler.get_apps)
         msg_handler.add_handlers("brightness", app_handler.set_brightness, display_handler.get_brightness)
         msg_handler.add_handlers("display_on", app_handler.display_on, app_handler.get_display_on)
@@ -91,20 +98,14 @@ async def main(args):
         # Pixel Art app message handlers
 
         await app_handler.switch_app("snakes")
-        msg_task = msg_handler.start()
-        await asyncio.gather(msg_task)
+        conn_server.start_in_thread()
+        conn_server.wait()
     finally:
         display_handler.clear()
         try:
             await app_handler.shutdown()
         except Exception as e:
             log.error(e)
-        if msg_task:
-            msg_task.cancel()
-            try:
-                await msg_task
-            except asyncio.CancelledError:
-                pass
 
 
 if __name__ == "__main__":
