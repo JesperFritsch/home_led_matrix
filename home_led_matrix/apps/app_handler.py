@@ -73,11 +73,11 @@ class AppHandler:
     async def display_on(self, value):
         if app := self._get_current_app():
             if value:
-                await app.pause()
-                display_handler.clear()
-            else:
                 await app.resume()
                 await app.redraw()
+            else:
+                await app.pause()
+                display_handler.clear()
 
     async def get_display_on(self):
         if app := self._get_current_app():

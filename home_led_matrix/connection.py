@@ -163,7 +163,7 @@ class ConnClient():
 
     def request(self, message: Request) -> Response:
         self._send_message(message)
-        if self._dealer_socket.poll(200) == zmq.POLLIN:
+        if self._dealer_socket.poll(2000) == zmq.POLLIN:
             response = self._dealer_socket.recv_string()
             log.debug(f"Received response: {response}")
             return Response.from_json(response)
