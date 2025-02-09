@@ -165,7 +165,7 @@ class ConnClient():
         self._send_message(message)
         if self._dealer_socket.poll(2000) == zmq.POLLIN:
             response = self._dealer_socket.recv_string()
-            log.info(f"Received response: {response}")
+            log.debug(f"Received response: {response}")
             return Response.from_json(response)
         else:
             log.error("No response received")

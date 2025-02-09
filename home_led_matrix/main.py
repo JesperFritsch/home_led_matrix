@@ -82,7 +82,7 @@ async def main(args):
         # Common message handlers
         msg_handler.add_handlers("current_app", app_handler.switch_app, app_handler.get_current_app)
         msg_handler.add_handlers("apps", getter=app_handler.get_apps)
-        msg_handler.add_handlers("brightness", app_handler.set_brightness, display_handler.get_brightness)
+        msg_handler.add_handlers("brightness", app_handler.set_brightness, app_handler.get_brightness)
         msg_handler.add_handlers("display_on", app_handler.display_on, app_handler.get_display_on)
 
         # Snake app message handlers

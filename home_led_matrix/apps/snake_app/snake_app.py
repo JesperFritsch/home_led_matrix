@@ -176,6 +176,8 @@ class SnakeApp(IAsyncApp):
     async def set_map(self, value):
         if value.lower() == "none":
             value = ""
+        if value not in await self.get_maps() + [""]:
+            return
         self._map = value
 
     async def get_map(self):

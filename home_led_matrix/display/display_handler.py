@@ -5,9 +5,27 @@ from pathlib import Path
 try:
     from rgbmatrix import RGBMatrix, RGBMatrixOptions
 except ImportError:
-    from unittest.mock import MagicMock
-    RGBMatrix = MagicMock()
-    RGBMatrixOptions = MagicMock()
+
+    class RGBMatrixOptions:
+        def __init__(self):
+            self.rows = 64
+            self.cols = 64
+            self.chain_length = 1
+            self.parallel = 1
+            self.hardware_mapping = 'regular'
+            self.brightness = 40
+            self.gpio_slowdown = 0
+
+    class RGBMatrix:
+        def __init__(self, options):
+            self.brightness = 40
+        def SetPixel(self, x, y, r, g, b):
+            pass
+        def Clear(self):
+            pass
+        def SetImage(self, image, unsafe):
+            pass
+
 
 from home_led_matrix.utils import SingletonMeta
 
