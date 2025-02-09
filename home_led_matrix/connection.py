@@ -31,11 +31,11 @@ def setup_logging():
 class ConnServer:
 
     def __init__(self,
-            port_route=conf["CONNECTION"]["route_port"],
-            port_pub=conf["CONNECTION"]["pub_port"],
+            route_port=conf["CONNECTION"]["route_port"],
+            pub_port=conf["CONNECTION"]["pub_port"],
             address=conf["CONNECTION"]["address"]):
-        self._port_route = port_route
-        self._port_pub = port_pub
+        self._route_port = route_port
+        self._pub_port = pub_port
         self._address = address
         self._context = zmq.asyncio.Context()
         self._route_socket = None
@@ -90,9 +90,9 @@ class ConnServer:
                 raise ValueError("Message handler not set")
             log.info("Starting connection server")
             self._route_socket = self._context.socket(zmq.ROUTER)
-            self._route_socket.bind(f"tcp://{self._address}:{self._port_route}")
+            self._route_socket.bind(f"tcp://{self._address}:{self._route_port}")
             self._pub_socket = self._context.socket(zmq.PUB)
-            self._pub_socket.bind(f"tcp://{self._address}:{self._port_pub}")
+            self._pub_socket.bind(f"tcp://{self._address}:{self._pub_port}")
             self._is_running = True
             await self._loop()
         except Exception as e:
@@ -111,16 +111,16 @@ class ConnServer:
 class ConnClient():
 
     def __init__(self,
-            port_route=conf["CONNECTION"]["route_port"],
-            port_pub=conf["CONNECTION"]["pub_port"],
-            address=conf["CONNECTION"]["address"]):
-        self._port_route = port_route
-        self._port_pub = port_pub
-        self._address = address
+            route_port=conf["CONNECTION"]["route_port"],
+            sub_port=conf["CONNECTION"]["pub_port"],
+            host=conf["CONNECTION"]["host"]):
+        self._route_port = route_port
+        self._sub_port = sub_port
+        self._address = host
         self._context = zmq.Context()
         self._dealer_socket = self._context.socket(zmq.DEALER)
         self._dealer_socket.setsockopt(zmq.LINGER, 200)
-        self._dealer_socket.connect(f"tcp://{self._address}:{self._port_route}")
+        self._dealer_socket.connect(f"tcp://{self._address}:{self._route_port}")
         self._sub_socket = None
         self._update_handler: Callable = None
         self._listen_thread = None
@@ -149,7 +149,7 @@ class ConnClient():
         if self._update_handler is None:
             raise ValueError("Update handler not set, set it with 'set_update_handler'")
         self._sub_socket = self._context.socket(zmq.SUB)
-        self._sub_socket.connect(f"tcp://{self._address}:{self._port_pub}")
+        self._sub_socket.connect(f"tcp://{self._address}:{self._sub_port}")
         self._sub_socket.setsockopt_string(zmq.SUBSCRIBE, "")
         self._listen_thread = Thread(target=self._listen_loop)
         self._listen_thread.daemon = True
@@ -163,7 +163,7 @@ class ConnClient():
 
     def request(self, message: Request) -> Response:
         self._send_message(message)
-        if self._dealer_socket.poll(2000) == zmq.POLLIN:
+        if self._dealer_socket.poll(200) == zmq.POLLIN:
             response = self._dealer_socket.recv_string()
             log.debug(f"Received response: {response}")
             return Response.from_json(response)

@@ -7,4 +7,3 @@ aiohttp
 websockets
 grpcio
 grpcio-tools
-grpc-tools
