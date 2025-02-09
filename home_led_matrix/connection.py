@@ -115,7 +115,7 @@ class ConnClient():
         self._host = host
         self._context = zmq.Context()
         self._dealer_socket = self._context.socket(zmq.DEALER)
-        self._dealer_socket.setsockopt(zmq.LINGER, 200)
+        self._dealer_socket.setsockopt(zmq.LINGER, 5000)
         self._dealer_socket.connect(f"tcp://{self._host}:{self._route_port}")
         self._sub_socket = None
         self._update_handler: Callable = None
@@ -159,7 +159,7 @@ class ConnClient():
 
     def request(self, message: Request) -> Response:
         self._send_message(message)
-        if self._dealer_socket.poll(2000) == zmq.POLLIN:
+        if self._dealer_socket.poll(3000) == zmq.POLLIN:
             frames = self._dealer_socket.recv_multipart()
             print(frames)
             if len(frames) == 2:
