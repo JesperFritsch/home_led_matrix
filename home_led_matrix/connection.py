@@ -169,6 +169,7 @@ class ConnClient():
             return Response.from_json(response)
         else:
             log.error("No response received")
+            return Response()
 
 
 if __name__ == "__main__":
