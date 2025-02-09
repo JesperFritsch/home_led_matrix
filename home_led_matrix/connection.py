@@ -59,10 +59,6 @@ class ConnServer:
     async def _loop(self):
         try:
             while self._is_running:
-                # try:
-                #     client_id, message = await asyncio.wait_for(self._route_socket.recv_multipart(), timeout=0.1)
-                # except asyncio.TimeoutError:
-                #     continue
                 client_id, message = await self._route_socket.recv_multipart()
                 request = Request.from_json(message.decode())
                 log.debug(f"Received from '{client_id.hex()}': {request}")
@@ -164,7 +160,12 @@ class ConnClient():
     def request(self, message: Request) -> Response:
         self._send_message(message)
         if self._dealer_socket.poll(2000) == zmq.POLLIN:
-            response = self._dealer_socket.recv_string()
+            frames = self._dealer_socket.recv_multipart()
+            print(frames)
+            if len(frames) == 2:
+                response = frames[1].decode()
+            else:
+                response = frames[0].decode()
             log.debug(f"Received response: {response}")
             return Response.from_json(response)
         else:
