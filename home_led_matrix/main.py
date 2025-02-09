@@ -22,7 +22,7 @@ log = logging.getLogger(Path(__file__).stem)
 
 DEFAULT_LOG_FILE = conf["LOGGING"]["file"]
 DEFAULT_LOG_LEVEL = conf["LOGGING"]["level"]
-DEFAULT_CONN_ADDR = conf["CONNECTION"]["address"]
+DEFAULT_CONN_HOST = conf["CONNECTION"]["host"]
 DEFAULT_ROUTE_PORT = conf["CONNECTION"]["route_port"]
 DEFAULT_PUB_PORT = conf["CONNECTION"]["pub_port"]
 # SNAKE APP
@@ -56,7 +56,7 @@ def cli(args):
     pixel_app.add_argument("--image-dir", default=DEFAULT_IMAGE_DIR, help=f"Image directory, default: {DEFAULT_IMAGE_DIR}")
 
     conn = p.add_argument_group("Connection")
-    conn.add_argument("--address", default=DEFAULT_CONN_ADDR, help=f"Socket file, default: {DEFAULT_CONN_ADDR}")
+    conn.add_argument("--ctl-host", default=DEFAULT_CONN_HOST, help=f"Socket file, default: {DEFAULT_CONN_HOST}")
     conn.add_argument("--route-port", default=DEFAULT_ROUTE_PORT, help=f"Route port, default: {DEFAULT_ROUTE_PORT}")
     conn.add_argument("--pub-port", default=DEFAULT_PUB_PORT, help=f"Publish port, default: {DEFAULT_PUB_PORT}")
 
@@ -70,7 +70,7 @@ def cli(args):
 async def main(args):
     try:
         msg_handler = MessageHandler()
-        conn_server = ConnServer(args.route_port, args.pub_port, args.address)
+        conn_server = ConnServer(args.route_port, args.pub_port, args.ctl_host)
         conn_server.set_message_handler(msg_handler)
         snake_app = SnakeApp(args.host, args.port)
         pixelart_app = PixelArtApp(args.image_dir)
