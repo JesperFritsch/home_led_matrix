@@ -37,10 +37,11 @@ class DisplayHandler(metaclass=SingletonMeta):
         options.rows = 64
         options.cols = 64
         options.brightness = 40
-        options.gpio_slowdown = 0
+        options.gpio_slowdown = 1
         options.chain_length = 1
         options.parallel = 1
         options.hardware_mapping = 'regular'
+        options.drop_privileges = False
         self._matrix = RGBMatrix(options = options)
 
     def set_pixels(self, pixels):

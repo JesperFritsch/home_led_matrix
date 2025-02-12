@@ -8,8 +8,8 @@ StartLimitIntervalSec=1
 Type=simple
 Restart=always
 RestartSec=1
-WorkingDirectory=/home/pi/home_led_matrix
-ExecStart=/home/pi/home_led_matrix/start_matrix.sh
+WorkingDirectory=/home/matrix/projects/home_led_matrix
+ExecStart=/home/matrix/projects/home_led_matrix/start_matrix.sh
 
 [Install]
 WantedBy=multi-user.target
