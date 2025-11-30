@@ -78,7 +78,7 @@ class SnakeApp(IAsyncApp):
                 display_handler.set_pixel(x, y, frame[y, x])
 
     async def load_map(self, init_data):
-        base_map = np.frombuffer(bytes(init_data.base_map), dtype=np.uint8).reshape(init_data.height, init_data.width)
+        base_map = np.frombuffer(bytes(init_data.base_map), dtype=init_data.base_map_dtype).reshape(init_data.height, init_data.width)
         color_mapping = self.get_color_mapping(init_data)
         self._last_frame = np.zeros((init_data.height * 2, init_data.width * 2, 3), dtype=np.uint8)
         pixel_changes = []
@@ -86,8 +86,8 @@ class SnakeApp(IAsyncApp):
             for x in range(init_data.width):
                 if base_map[y, x] == init_data.blocked_value:
                     color = color_mapping[base_map[y, x]]
-                    exp_x = x * 2 + 1 # expand by 2 offset by 1
-                    exp_y = y * 2 + 1
+                    exp_x = x * 2 # expand by 2 offset by 1
+                    exp_y = y * 2
                     pixel_changes.append((exp_x, exp_y, color))
                     for x_d, y_d in [(1, 0), (0, 1), (-1, 0), (0, -1)]:
                         if not (0 <= y + y_d < init_data.height and 0 <= x + x_d < init_data.width):
