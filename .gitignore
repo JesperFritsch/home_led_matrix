@@ -3,7 +3,6 @@
 *.pyc
 *.pyo
 *.pyd
-**/py_proto/
 build/
 app_log
 *.log

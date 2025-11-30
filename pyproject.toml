@@ -1,9 +1,43 @@
 [build-system]
 requires = [
-    "setuptools>=42",
+    "setuptools>=61",
     "wheel",
     "grpcio-tools"
 ]
 build-backend = "setuptools.build_meta"
-packages = ["home_led_matrix"]
+
+[project]
+name = "home_led_matrix"
+version = "0.0.1"
+description = "A small package to control a LED matrix"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [ { name = "Jesper Fritsch", email = "jesperf96@gmail.com" } ]
+license = { text = "MIT" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "numpy",
+    "grpcio",
+    "grpcio-tools",
+    "pillow",
+    "firebase_admin",
+    "aiohttp",
+    "websockets",
+    "pyzmq",
+    "tornado>=6.1",
+    "snake_proto_template @ git+ssh://git@github.com/JesperFritsch/snake_proto_template.git@main"
+]
+
+[project.urls]
+Homepage = "https://github.com/JesperFritsch/home_led_matrix"
+
+[tool.setuptools]
 include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["home_led_matrix*"]

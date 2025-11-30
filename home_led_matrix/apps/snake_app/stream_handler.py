@@ -8,7 +8,7 @@ from pathlib import Path
 from collections import deque
 from dataclasses import dataclass
 
-from home_led_matrix.apps.snake_app.py_proto.sim_msgs_pb2 import (
+from snake_proto_template.python.sim_msgs_pb2 import (
     Request,
     BadRequest,
     PixelChangesReq,
