@@ -1,4 +1,4 @@
-
+import json
 import logging
 import aiohttp
 
@@ -28,6 +28,28 @@ class DotDict(dict):
             if isinstance(v, dict):
                 v = DotDict(v)
             self[k] = v
+
+
+class ConfigPersist(DotDict):
+    def __init__(self, name: str):
+        super().__init__()
+        self._name = name
+        self._file_path = Path(Path.home(), ".config", f"{self._name}.json")
+        self.load()
+
+    def save(self):
+        with open(self._file_path, 'w') as f:
+            json.dump(self, f)
+
+    def load(self):
+        if self._file_path.exists():
+            with open(self._file_path) as f:
+                data = json.load(f)
+                self.read_dict(data)
+    
+    def set(self, key, value):
+        self[key] = value
+        self.save()
 
 
 class SingletonMeta(type):

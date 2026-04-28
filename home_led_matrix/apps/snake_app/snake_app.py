@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from typing import Optional
 
-from home_led_matrix.utils import convert_arg, async_get_request
+from home_led_matrix.utils import convert_arg, async_get_request, ConfigPersist
 from home_led_matrix.display.display_handler import DisplayHandler
 from home_led_matrix.apps.app_interface import IAsyncApp
 from home_led_matrix.apps.snake_app.stream_handler import StreamHandler, request_run
@@ -18,11 +18,13 @@ class SnakeApp(IAsyncApp):
         self._host = host
         self._port = port
         self._stream_handler = StreamHandler()
-        self._nr_snakes = 7
-        self._food = 15
-        self._food_decay = 0
-        self._fps = 10
-        self._map = ""
+        self._config = ConfigPersist("snake_app")
+        self._config.setdefault("nr_snakes", 7)
+        self._config.setdefault("food", 15)
+        self._config.setdefault("food_decay", 0)
+        self._config.setdefault("fps", 10)
+        self._config.setdefault("map", "")
+        self._config.save()
         self._current_run_id = None
         self._unpaused_event = asyncio.Event()
         self._restart_event = asyncio.Event()
@@ -53,10 +55,10 @@ class SnakeApp(IAsyncApp):
 
     async def _request_new_run(self):
         config = {
-            'snake_count': self._nr_snakes,
-            'food': self._food,
-            'food_decay': self._food_decay,
-            'map': self._map if self._map else self._map,
+            'snake_count': self._config.nr_snakes,
+            'food': self._config.food,
+            'food_decay': self._config.food_decay,
+            'map': self._config.map if self._config.map else self._config.map,
             'grid_height': 32,
             'grid_width': 32,
             'start_length': 3
@@ -153,24 +155,24 @@ class SnakeApp(IAsyncApp):
 
     @convert_arg(int)
     async def set_food(self, value):
-        self._food = value
+        self._config.set('food', value)
 
     async def get_food(self):
-        return self._food
+        return self._config.food
 
     @convert_arg(int)
     async def set_food_decay(self, value):
-        self._food_decay = value
+        self._config.set('food_decay', value)
 
     async def get_food_decay(self):
-        return self._food_decay
+        return self._config.food_decay
 
     @convert_arg(int)
     async def set_fps(self, value):
-        self._fps = value
+        self._config.set('fps', value)
 
     async def get_fps(self):
-        return self._fps
+        return self._config.fps
 
     @convert_arg(str)
     async def set_map(self, value):
@@ -178,17 +180,17 @@ class SnakeApp(IAsyncApp):
             value = ""
         if value not in await self.get_maps() + [""]:
             return
-        self._map = value
+        self._config.set('map', value)
 
     async def get_map(self):
-        return self._map
+        return self._config.map
 
     @convert_arg(int)
     async def set_nr_snakes(self, value):
-        self._nr_snakes = value
+        self._config.set('nr_snakes', value)
 
     async def get_nr_snakes(self):
-        return self._nr_snakes
+        return self._config.nr_snakes
 
     async def get_maps(self):
         return await async_get_request(f"http://{self._host}:{self._port}/api/map_names")
