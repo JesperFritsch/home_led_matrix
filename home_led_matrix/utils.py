@@ -31,10 +31,10 @@ class DotDict(dict):
 
 
 class ConfigPersist(DotDict):
-    def __init__(self, name: str):
+    def __init__(self, name: str, file_path: Path = None):
         super().__init__()
         self._name = name
-        self._file_path = Path(Path.home(), ".config", f"{self._name}.json")
+        self._file_path = str(file_path or Path(Path.home(), ".config", f"{self._name}.json"))
         self.load()
 
     def save(self):
