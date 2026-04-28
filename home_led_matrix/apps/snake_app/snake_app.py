@@ -18,7 +18,7 @@ class SnakeApp(IAsyncApp):
         self._host = host
         self._port = port
         self._stream_handler = StreamHandler()
-        self._config = ConfigPersist("snake_app")
+        self._config = ConfigPersist("run_config")
         self._config.setdefault("nr_snakes", 7)
         self._config.setdefault("food", 15)
         self._config.setdefault("food_decay", 0)
