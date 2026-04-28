@@ -38,14 +38,14 @@ class ConfigPersist(DotDict):
         self.load()
 
     def save(self):
-        if not self._file_path.parent.exists():
-            self._file_path.parent.mkdir(parents=True)
-        with open(self._file_path, 'w') as f:
+        if not Path(self._file_path).parent.exists():
+            Path(self._file_path).parent.mkdir(parents=True)
+        with open(Path(self._file_path), 'w') as f:
             json.dump(self, f)
 
     def load(self):
-        if self._file_path.exists():
-            with open(self._file_path) as f:
+        if Path(self._file_path).exists():
+            with open(Path(self._file_path)) as f:
                 data = json.load(f)
                 self.read_dict(data)
     
