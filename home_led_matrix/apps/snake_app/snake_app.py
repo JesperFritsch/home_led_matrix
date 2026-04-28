@@ -120,7 +120,7 @@ class SnakeApp(IAsyncApp):
             changes_queue = step_pixel_changes.pixel_data
             current_pixel_changes = changes_queue.popleft()
             self._update_display(current_pixel_changes)
-            await asyncio.sleep(1 / self._fps)
+            await asyncio.sleep(1 / self._config.fps)
 
     def _update_display(self, pixel_changes):
         for x, y, color in pixel_changes:
