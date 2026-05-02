@@ -274,12 +274,16 @@ class StreamHandler:
         return self._receive_task is None or self._receive_task.done()
 
 
-async def request_run(host, port, config) -> str:
+async def request_run(host, port, config, retries: int = 10) -> str:
     uri = f'http://{host}:{port}/api/request_run'
-    log.debug(f"Posting to: {uri}")
-    resp = await async_post_request(uri, config)
-    if resp and resp["result"] == "success":
-        return resp.get('run_id')
-    else:
-        log.error(f"Failed to request run: {resp}")
-        return None
+    for attempt in range(1, retries + 1):
+        log.debug(f"Attempt {attempt} to request run")
+        try:
+            run_id = await async_post_request(uri, config)
+            if run_id and run_id.get("result") == "success":
+                return run_id.get('run_id')
+            else:
+                log.error(f"Failed to request run: {run_id}")
+        except Exception as e:
+            log.error(f"Error requesting run: {e}")
+        await asyncio.sleep(10 * attempt)  # Exponential backoff
